@@ -1,75 +1,67 @@
-# My Project — Pipeline de Consolidação de Vendas e Estoque
+# Sales and Inventory Consolidation Pipeline
 
-Pipeline de automação local (CLI) que varre um diretório de entrada em busca de arquivos
-Excel (`.xlsx`) e CSV (`.csv`) de diferentes filiais, normaliza colunas e tipos de dados,
-trata valores nulos, consolida tudo em um único DataFrame e gera um relatório Excel
-formatado com múltiplas abas — registrando toda a operação em um arquivo de log para
-auditoria.
+A local CLI automation pipeline that scans an input directory for Excel (`.xlsx`) and CSV (`.csv`) files from different branches, normalizes columns and data types, handles missing values, consolidates everything into a single DataFrame, and generates a formatted Excel report with multiple worksheets — while logging the entire operation to an audit log.
 
-> **Objetivo de negócio:** eliminar as ~8 horas semanais gastas na consolidação manual
-> de arquivos com formatações inconsistentes, valores nulos, colunas divergentes e
-> tipagens incorretas (datas como texto, moedas com símbolos, etc.).
+> **Business objective:** eliminate the approximately 8 hours per week spent manually consolidating files with inconsistent formatting, missing values, mismatched columns, and incorrect data types (dates stored as text, currencies containing symbols, etc.).
 
 ---
 
-## Sumário
+## Table of Contents
 
-- [Visão geral](#visão-geral)
-- [Funcionalidades](#funcionalidades)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
-- [Uso](#uso)
-- [Formato dos arquivos de entrada](#formato-dos-arquivos-de-entrada)
-- [Saída gerada](#saída-gerada)
-- [Logs e auditoria](#logs-e-auditoria)
-- [Testes](#testes)
-- [Qualidade de código](#qualidade-de-código)
+- [Overview](#overview)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Input File Format](#input-file-format)
+- [Generated Output](#generated-output)
+- [Logging and Auditing](#logging-and-auditing)
+- [Tests](#tests)
+- [Code Quality](#code-quality)
 - [CI/CD](#cicd)
-- [Solução de problemas](#solução-de-problemas)
-- [Licença](#licença)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+- [Contributing](#contributing)
 
 ---
 
-## Visão geral
+## Overview
 
-O pipeline executa as seguintes etapas, em ordem:
+The pipeline performs the following steps, in order:
 
-1. **Varredura** do diretório de entrada (`input_data/`) em busca de arquivos `.xlsx` e `.csv`.
-2. **Normalização** dos nomes das colunas (minúsculas, sem acentos, `snake_case`) e dos
-   tipos de dados (datas padronizadas, valores numéricos limpos de símbolos de moeda).
-3. **Tratamento de nulos** (preenchimento com `0` para numéricos, `UNKNOWN` para texto,
-   e descarte de linhas com nulos em colunas críticas).
-4. **Consolidação** de todos os dados em um único `DataFrame` unificado.
-5. **Geração de tabelas resumo** (Total de Vendas por Filial, Produtos com Estoque Crítico).
-6. **Exportação** para `output_data/` como um arquivo Excel formatado com múltiplas abas.
-7. **Registro** de toda a operação em `logs/execution.log`.
+1. **Scanning** the input directory (`input_data/`) for `.xlsx` and `.csv` files.
+2. **Normalization** of column names (lowercase, no accents, `snake_case`) and data types (standardized dates, numeric values cleaned of currency symbols).
+3. **Missing-value handling** (filling numeric values with `0`, text values with `UNKNOWN`, and dropping rows with missing values in critical columns).
+4. **Consolidation** of all data into a single unified `DataFrame`.
+5. **Summary table generation** (Total Sales by Branch, Products with Critical Stock Levels).
+6. **Exporting** the results to `output_data/` as a formatted Excel workbook with multiple worksheets.
+7. **Logging** the entire operation to `logs/execution.log`.
 
-O processamento é **tolerante a falhas**: se um arquivo falhar (erro de leitura, parsing,
-etc.), o erro é registrado no log e o pipeline continua para o próximo arquivo.
+The pipeline is **fault-tolerant**: if a file fails to process (due to a read error, parsing error, etc.), the error is recorded in the log and the pipeline continues processing the next file.
 
 ---
 
-## Funcionalidades
+## Features
 
-- ✅ Leitura de arquivos `.xlsx` e `.csv` com detecção automática de separador.
-- ✅ Normalização de nomes de colunas (acentos, espaços, maiúsculas/minúsculas).
-- ✅ Conversão robusta de datas (texto → `datetime`) e valores monetários (texto → `float`).
-- ✅ Tratamento configurável de valores nulos.
-- ✅ Consolidação vetorizada (sem `iterrows()`).
-- ✅ Tabelas resumo: vendas por filial e estoque crítico.
-- ✅ Exportação Excel com múltiplas abas via `openpyxl`.
-- ✅ Logging estruturado em arquivo e console.
-- ✅ Configuração via variáveis de ambiente (`.env`).
-- ✅ Testes unitários com `pytest`.
-- ✅ CI/CD com GitHub Actions.
+- ✅ Reads `.xlsx` and `.csv` files with automatic delimiter detection.
+- ✅ Normalizes column names (accents, spaces, uppercase/lowercase).
+- ✅ Robustly converts dates (text → `datetime`) and currency values (text → `float`).
+- ✅ Configurable handling of missing values.
+- ✅ Vectorized data consolidation (without `iterrows()`).
+- ✅ Summary tables: sales by branch and critical stock levels.
+- ✅ Multi-worksheet Excel export using `openpyxl`.
+- ✅ Structured logging to both file and console.
+- ✅ Configuration through environment variables (`.env`).
+- ✅ Unit tests with `pytest`.
+- ✅ CI/CD with GitHub Actions.
 
 ---
 
-## Estrutura do projeto
+## Project Structure
 
-```
+```text
 .
 ├── .github/
 │   └── workflows/
@@ -116,29 +108,29 @@ etc.), o erro é registrado no log e o pipeline continua para o próximo arquivo
 
 ---
 
-## Requisitos
+## Requirements
 
 - **Python** `>= 3.10`
-- Dependências de runtime:
+- Runtime dependencies:
   - `pandas >= 2.0.0`
   - `openpyxl >= 3.1.0`
   - `python-dotenv >= 1.0.0`
-- Dependências de desenvolvimento:
+- Development dependencies:
   - `pytest >= 7.4.0`
   - `pytest-cov >= 4.1.0`
 
 ---
 
-## Instalação
+## Installation
 
-### 1. Clone o repositório
+### 1. Clone the repository
 
 ```bash
-git clone <url-do-repositorio>
+git clone <repository-url>
 cd my-project
 ```
 
-### 2. Crie e ative um ambiente virtual
+### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv .venv
@@ -150,181 +142,178 @@ source .venv/bin/activate
 .venv\Scripts\Activate.ps1
 ```
 
-### 3. Instale as dependências
+### 3. Install the dependencies
 
-Instalação em modo editável (recomendado para desenvolvimento):
+Editable installation (recommended for development):
 
 ```bash
 pip install -e ".[dev]"
 ```
 
-Ou, alternativamente, via `requirements.txt`:
+Alternatively, install dependencies using `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure as variáveis de ambiente
+### 4. Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` conforme necessário (veja [Configuração](#configuração)).
+Edit the `.env` file as needed (see [Configuration](#configuration)).
 
 ---
 
-## Configuração
+## Configuration
 
-Todas as configurações são lidas de variáveis de ambiente (com suporte a `.env` via
-`python-dotenv`). Os valores padrão estão definidos em `config/settings.py`.
+All settings are read from environment variables (with `.env` support provided by `python-dotenv`). Default values are defined in `config/settings.py`.
 
-| Variável | Padrão | Descrição |
+| Variable | Default | Description |
 |---|---|---|
-| `INPUT_DIR` | `input_data` | Diretório varrido em busca de arquivos `.xlsx`/`.csv`. |
-| `OUTPUT_DIR` | `output_data` | Diretório onde o relatório consolidado é gravado. |
-| `OUTPUT_FILENAME` | `consolidated_report.xlsx` | Nome do arquivo Excel gerado. |
-| `LOG_DIR` | `logs` | Diretório do arquivo de log. |
-| `LOG_FILENAME` | `execution.log` | Nome do arquivo de log. |
-| `LOG_LEVEL` | `INFO` | Nível de logging (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). |
-| `NULL_NUMERIC_FILL_VALUE` | `0` | Valor de preenchimento para nulos numéricos. |
-| `NULL_TEXT_FILL_VALUE` | `UNKNOWN` | Valor de preenchimento para nulos textuais. |
-| `DROP_CRITICAL_NULLS` | `true` | Descarta linhas com nulos em colunas críticas. |
-| `CRITICAL_STOCK_THRESHOLD` | `10` | Limite abaixo do qual o estoque é considerado crítico. |
-| `SHEET_CONSOLIDATED` | `Consolidated` | Nome da aba com os dados consolidados. |
-| `SHEET_SALES_BY_BRANCH` | `SalesByBranch` | Nome da aba com vendas por filial. |
-| `SHEET_CRITICAL_STOCK` | `CriticalStock` | Nome da aba com estoque crítico. |
-| `CONTINUE_ON_ERROR` | `true` | Continua o processamento quando um arquivo falha. |
-| `ENVIRONMENT` | `development` | Nome do ambiente (`development`, `staging`, `production`). |
+| `INPUT_DIR` | `input_data` | Directory scanned for `.xlsx` and `.csv` files. |
+| `OUTPUT_DIR` | `output_data` | Directory where the consolidated report is saved. |
+| `OUTPUT_FILENAME` | `consolidated_report.xlsx` | Name of the generated Excel file. |
+| `LOG_DIR` | `logs` | Directory where the log file is stored. |
+| `LOG_FILENAME` | `execution.log` | Name of the log file. |
+| `LOG_LEVEL` | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). |
+| `NULL_NUMERIC_FILL_VALUE` | `0` | Fill value for missing numeric data. |
+| `NULL_TEXT_FILL_VALUE` | `UNKNOWN` | Fill value for missing text data. |
+| `DROP_CRITICAL_NULLS` | `true` | Drops rows containing missing values in critical columns. |
+| `CRITICAL_STOCK_THRESHOLD` | `10` | Threshold below which inventory is considered critical. |
+| `SHEET_CONSOLIDATED` | `Consolidated` | Name of the worksheet containing consolidated data. |
+| `SHEET_SALES_BY_BRANCH` | `SalesByBranch` | Name of the worksheet containing sales by branch. |
+| `SHEET_CRITICAL_STOCK` | `CriticalStock` | Name of the worksheet containing critical stock items. |
+| `CONTINUE_ON_ERROR` | `true` | Continues processing when a file fails. |
+| `ENVIRONMENT` | `development` | Environment name (`development`, `staging`, `production`). |
 
-> ⚠️ **Nunca** faça commit do arquivo `.env` real. Use apenas o `.env.example` como
-> referência.
+> ⚠️ **Never** commit your actual `.env` file. Use `.env.example` as a reference only.
 
 ---
 
-## Uso
+## Usage
 
-### 1. Coloque os arquivos de entrada
+### 1. Add the input files
 
-Copie os arquivos `.xlsx` e `.csv` das filiais para o diretório `input_data/`:
+Copy the branches' `.xlsx` and `.csv` files into the `input_data/` directory:
 
 ```bash
 mkdir -p input_data
-cp /caminho/para/filiais/*.xlsx input_data/
-cp /caminho/para/filiais/*.csv  input_data/
+cp /path/to/branches/*.xlsx input_data/
+cp /path/to/branches/*.csv input_data/
 ```
 
-### 2. Execute o pipeline
+### 2. Run the pipeline
 
-Via entry point instalado:
+Using the installed entry point:
 
 ```bash
 my-project
 ```
 
-Ou diretamente pelo módulo:
+Or directly through the module:
 
 ```bash
 python -m my_project.main
 ```
 
-Ou ainda executando o script:
+Alternatively, run the script directly:
 
 ```bash
 python src/my_project/main.py
 ```
 
-### 3. Verifique os resultados
+### 3. Check the results
 
-- **Relatório Excel:** `output_data/consolidated_report.xlsx`
-- **Log de execução:** `logs/execution.log`
+- **Excel report:** `output_data/consolidated_report.xlsx`
+- **Execution log:** `logs/execution.log`
 
 ---
 
-## Formato dos arquivos de entrada
+## Input File Format
 
-Os arquivos podem ter nomes de colunas divergentes entre filiais. O pipeline normaliza
-os nomes automaticamente. Exemplos de colunas reconhecidas:
+Column names may differ between branches. The pipeline automatically normalizes them. Examples of recognized column names:
 
-| Conceito | Exemplos de nomes aceitos |
+| Concept | Accepted column name examples |
 |---|---|
-| Data | `Data`, `DATA`, `data_venda`, `Data Venda` |
-| Filial | `Filial`, `FILIAL`, `Loja`, `Unidade` |
-| Produto | `Produto`, `PRODUTO`, `Descrição`, `Item` |
-| Quantidade | `Quantidade`, `Qtd`, `QTDE` |
-| Valor | `Valor`, `Preço`, `Total`, `R$` |
-| Estoque | `Estoque`, `Estoque Atual`, `Saldo` |
+| Date | `Date`, `DATE`, `sale_date`, `Sale Date` |
+| Branch | `Branch`, `BRANCH`, `Store`, `Unit` |
+| Product | `Product`, `PRODUCT`, `Description`, `Item` |
+| Quantity | `Quantity`, `Qty`, `QTY` |
+| Amount | `Amount`, `Price`, `Total`, `Currency` |
+| Stock | `Stock`, `Current Stock`, `Balance` |
 
-**Tipos de dados tolerados:**
+**Supported data formats:**
 
-- Datas como texto (`"01/02/2024"`, `"2024-02-01"`) → convertidas para `datetime`.
-- Valores monetários com símbolos (`"R$ 1.234,56"`) → convertidos para `float`.
-- Valores nulos (`""`, `"N/A"`, `"null"`) → tratados conforme configuração.
+- Dates stored as text (`"01/02/2024"`, `"2024-02-01"`) → converted to `datetime`.
+- Currency values containing symbols (`"R$ 1.234,56"`) → converted to `float`.
+- Missing values (`""`, `"N/A"`, `"null"`) → handled according to the configuration.
 
 ---
 
-## Saída gerada
+## Generated Output
 
-O arquivo `output_data/consolidated_report.xlsx` contém as seguintes abas:
+The `output_data/consolidated_report.xlsx` file contains the following worksheets:
 
-| Aba | Conteúdo |
+| Worksheet | Contents |
 |---|---|
-| `Consolidated` | Todos os dados unificados e normalizados de todas as filiais. |
-| `SalesByBranch` | Total de vendas agregado por filial. |
-| `CriticalStock` | Produtos com estoque abaixo do limite configurado. |
+| `Consolidated` | All unified and normalized data from every branch. |
+| `SalesByBranch` | Total sales aggregated by branch. |
+| `CriticalStock` | Products with stock levels below the configured threshold. |
 
 ---
 
-## Logs e auditoria
+## Logging and Auditing
 
-Toda a execução é registrada em `logs/execution.log`, incluindo:
+Every execution is recorded in `logs/execution.log`, including:
 
-- Início e fim do pipeline (com timestamp).
-- Arquivos encontrados e processados.
-- Erros de leitura/parsing por arquivo (sem interromper o pipeline).
-- Contagem de linhas consolidadas.
-- Caminho do relatório gerado.
+- Pipeline start and completion (with timestamps).
+- Files found and processed.
+- File-level read/parsing errors (without stopping the pipeline).
+- Number of consolidated rows.
+- Path to the generated report.
 
-Exemplo de entrada de log:
+Example log entries:
 
-```
-2024-02-01 10:15:32,123 - my_project - INFO - Iniciando pipeline de consolidação.
-2024-02-01 10:15:32,456 - my_project - INFO - Arquivo processado: filial_sp.xlsx (1200 linhas).
-2024-02-01 10:15:33,789 - my_project - ERROR - Falha ao processar filial_rj.csv: ...
-2024-02-01 10:15:34,012 - my_project - INFO - Relatório gerado em output_data/consolidated_report.xlsx
+```text
+2024-02-01 10:15:32,123 - my_project - INFO - Starting consolidation pipeline.
+2024-02-01 10:15:32,456 - my_project - INFO - File processed: branch_sp.xlsx (1200 rows).
+2024-02-01 10:15:33,789 - my_project - ERROR - Failed to process branch_rj.csv: ...
+2024-02-01 10:15:34,012 - my_project - INFO - Report generated at output_data/consolidated_report.xlsx
 ```
 
 ---
 
-## Testes
+## Tests
 
-Execute a suíte de testes:
+Run the test suite:
 
 ```bash
 pytest
 ```
 
-Com relatório de cobertura:
+To generate a coverage report:
 
 ```bash
 pytest --cov=src/my_project --cov-report=term-missing
 ```
 
-Os testes ficam em `tests/` e utilizam fixtures definidas em `tests/conftest.py`.
+Tests are located in `tests/` and use fixtures defined in `tests/conftest.py`.
 
 ---
 
-## Qualidade de código
+## Code Quality
 
-O projeto adota:
+The project follows these practices:
 
-- **Type hints** em todas as funções.
-- **Docstrings** no estilo Google.
-- **Tratamento de erros** robusto (arquivos ausentes, falhas de parsing).
-- **Vetorização** com pandas (sem `iterrows()`).
-- **Linting** com `ruff` e **tipagem estática** com `mypy` (configurados em `pyproject.toml`).
+- **Type hints** for all functions.
+- **Google-style docstrings**.
+- **Robust error handling** (missing files, parsing failures).
+- **Pandas vectorization** (without `iterrows()`).
+- **Linting** with `ruff` and **static type checking** with `mypy` (configured in `pyproject.toml`).
 
-Para executar as verificações:
+Run the quality checks:
 
 ```bash
 ruff check src tests
@@ -335,41 +324,39 @@ mypy src/my_project
 
 ## CI/CD
 
-O workflow `.github/workflows/tests.yml` executa automaticamente, a cada `push` e
-`pull_request`:
+The `.github/workflows/tests.yml` workflow runs automatically on every `push` and `pull_request`:
 
-1. Instalação das dependências.
-2. Execução do `ruff` (lint).
-3. Execução do `mypy` (tipagem).
-4. Execução do `pytest` com cobertura.
+1. Dependency installation.
+2. `ruff` execution (linting).
+3. `mypy` execution (type checking).
+4. `pytest` execution with coverage.
 
 ---
 
-## Solução de problemas
+## Troubleshooting
 
-| Sintoma | Causa provável | Solução |
+| Symptom | Likely cause | Solution |
 |---|---|---|
-| `FileNotFoundError` no diretório de entrada | `input_data/` não existe ou está vazio. | Crie o diretório e adicione arquivos. |
-| Nenhum arquivo processado | Extensões não suportadas. | Use apenas `.xlsx` ou `.csv`. |
-| Datas não convertidas | Formato não reconhecido. | Verifique o formato no arquivo de origem. |
-| Valores monetários como texto | Símbolos não mapeados. | Ajuste a normalização em `data_processing.py`. |
-| Log não gerado | Permissão de escrita em `logs/`. | Verifique permissões do diretório. |
+| `FileNotFoundError` for the input directory | `input_data/` does not exist or is empty. | Create the directory and add input files. |
+| No files processed | Unsupported file extensions. | Use only `.xlsx` or `.csv` files. |
+| Dates not converted | Unrecognized date format. | Check the format used in the source file. |
+| Currency values remain as text | Unmapped symbols. | Adjust the normalization logic in `data_processing.py`. |
+| Log file not generated | No write permission for `logs/`. | Check the directory permissions. |
 
 ---
 
-## Licença
+## License
 
-Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE](LICENSE)
-para mais detalhes.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
-## Contribuição
+## Contributing
 
-1. Faça um fork do projeto.
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`).
-3. Faça commit das alterações (`git commit -m 'feat: adiciona nova funcionalidade'`).
-4. Faça push para a branch (`git push origin feature/nova-funcionalidade`).
-5. Abra um Pull Request.
+1. Fork the repository.
+2. Create a branch for your feature (`git checkout -b feature/new-feature`).
+3. Commit your changes (`git commit -m 'feat: add new feature'`).
+4. Push the branch (`git push origin feature/new-feature`).
+5. Open a Pull Request.
 
-Consulte o [CHANGELOG.md](CHANGELOG.md) para o histórico de versões.
+See [CHANGELOG.md](CHANGELOG.md) for the version history.

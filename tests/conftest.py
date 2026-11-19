@@ -26,7 +26,6 @@ import pytest
 
 from config.settings import Settings
 
-
 # ---------------------------------------------------------------------------
 # Path fixtures
 # ---------------------------------------------------------------------------
@@ -216,4 +215,3 @@ def caplog_handler() -> Iterator[logging.Handler]:
     finally:
         logger.removeHandler(handler)
         logger.setLevel(previous_level)
-</｜｜DSML｜｜>

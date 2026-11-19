@@ -45,7 +45,9 @@ def ensure_directory(path: Path) -> Path:
     directory = Path(path)
     if directory.exists():
         if not directory.is_dir():
-            raise NotADirectoryError(f"O caminho existe mas não é um diretório: {directory}")
+            raise NotADirectoryError(
+                f"O caminho existe mas não é um diretório: {directory}"
+            )
         return directory
 
     try:
@@ -132,7 +134,9 @@ def format_currency(value: float, *, symbol: str = "R$") -> str:
         amount = 0.0
 
     formatted = f"{amount:,.2f}"
-    formatted = formatted.replace(",", "\u0000").replace(".", ",").replace("\u0000", ".")
+    formatted = (
+        formatted.replace(",", "\u0000").replace(".", ",").replace("\u0000", ".")
+    )
     return f"{symbol} {formatted}"
 
 
@@ -166,4 +170,3 @@ def flatten(nested: Iterable[Iterable[T]]) -> list[T]:
         A flat list containing all inner elements in order.
     """
     return [item for group in nested for item in group]
-</｜｜DSML｜｜>

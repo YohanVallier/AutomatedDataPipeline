@@ -8,16 +8,13 @@ of the end-to-end pipeline.
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
-from typing import Iterator
 
 import pandas as pd
 import pytest
-
-from my_project.main import _process_single_file, main, run_pipeline
 from config.settings import Settings
 
+from my_project.main import _process_single_file, main, run_pipeline
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -145,9 +142,7 @@ def empty_csv(settings: Settings) -> Path:
 # ---------------------------------------------------------------------------
 
 
-def test_process_single_file_returns_normalized_frame(
-    sample_csv: Path, settings: Settings
-) -> None:
+def test_process_single_file_returns_normalized_frame(sample_csv: Path, settings: Settings) -> None:
     """A valid CSV file is read and normalized into a DataFrame."""
     result = _process_single_file(sample_csv, settings)
 
@@ -159,24 +154,18 @@ def test_process_single_file_returns_normalized_frame(
     assert pd.api.types.is_numeric_dtype(result["valor"])
 
 
-def test_process_single_file_missing_file_returns_none(
-    settings: Settings, tmp_path: Path
-) -> None:
+def test_process_single_file_missing_file_returns_none(settings: Settings, tmp_path: Path) -> None:
     """A missing file is logged and yields ``None``."""
     missing = tmp_path / "does_not_exist.csv"
     assert _process_single_file(missing, settings) is None
 
 
-def test_process_single_file_corrupt_returns_none(
-    corrupt_csv: Path, settings: Settings
-) -> None:
+def test_process_single_file_corrupt_returns_none(corrupt_csv: Path, settings: Settings) -> None:
     """A corrupt file is logged and yields ``None`` without raising."""
     assert _process_single_file(corrupt_csv, settings) is None
 
 
-def test_process_single_file_empty_returns_none(
-    empty_csv: Path, settings: Settings
-) -> None:
+def test_process_single_file_empty_returns_none(empty_csv: Path, settings: Settings) -> None:
     """An empty file is logged and yields ``None``."""
     assert _process_single_file(empty_csv, settings) is None
 
@@ -186,9 +175,7 @@ def test_process_single_file_empty_returns_none(
 # ---------------------------------------------------------------------------
 
 
-def test_run_pipeline_success(
-    settings: Settings, sample_csv: Path, sample_xlsx: Path
-) -> None:
+def test_run_pipeline_success(settings: Settings, sample_csv: Path, sample_xlsx: Path) -> None:
     """The pipeline consolidates valid files and writes the Excel report."""
     exit_code = run_pipeline(settings)
 
@@ -246,9 +233,7 @@ def test_run_pipeline_aborts_on_error_when_configured(
     assert run_pipeline(strict) == 2
 
 
-def test_run_pipeline_writes_log(
-    settings: Settings, sample_csv: Path
-) -> None:
+def test_run_pipeline_writes_log(settings: Settings, sample_csv: Path) -> None:
     """The pipeline writes an execution log file."""
     run_pipeline(settings)
     log_file = Path(settings.log_dir) / settings.log_filename
@@ -257,13 +242,11 @@ def test_run_pipeline_writes_log(
     assert "Iniciando pipeline" in content
 
 
-def test_run_pipeline_with_only_empty_files(
-    settings: Settings, empty_csv: Path
-) -> None:
+def test_run_pipeline_with_only_empty_files(settings: Settings, empty_csv: Path) -> None:
     """When all files are empty, the pipeline returns exit code ``1`` and logs the event."""
     exit_code = run_pipeline(settings)
     assert exit_code == 1
-    
+
     log_file = Path(settings.log_dir) / settings.log_filename
     assert log_file.exists()
     content = log_file.read_text(encoding="utf-8")

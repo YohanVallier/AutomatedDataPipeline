@@ -120,9 +120,7 @@ def _read_csv(file_path: Path) -> pd.DataFrame:
         except pd.errors.ParserError as exc:
             raise ValueError(f"Erro de parsing no CSV {file_path.name}: {exc}") from exc
 
-    raise ValueError(
-        f"Não foi possível decodificar o CSV {file_path.name}: {last_error}"
-    )
+    raise ValueError(f"Não foi possível decodificar o CSV {file_path.name}: {last_error}")
 
 
 def _read_excel(file_path: Path) -> pd.DataFrame:
@@ -201,10 +199,7 @@ def _autofit_columns(writer: pd.ExcelWriter, sheet_name: str, frame: pd.DataFram
 
     for index, column in enumerate(frame.columns, start=1):
         header_length = len(str(column))
-        if frame.empty:
-            content_length = 0
-        else:
-            content_length = int(frame[column].astype(str).str.len().max() or 0)
+        content_length = 0 if frame.empty else int(frame[column].astype(str).str.len().max() or 0)
         width = max(header_length, content_length) + 2
         letter = worksheet.cell(row=1, column=index).column_letter
         worksheet.column_dimensions[letter].width = min(width, 60)
@@ -215,7 +210,7 @@ def export_report(
     consolidated: pd.DataFrame,
     sales_by_branch: pd.DataFrame,
     critical_stock: pd.DataFrame,
-    settings: "Settings",
+    settings: Settings,
 ) -> Path:
     """Export the consolidated data and summaries to a multi-sheet Excel file.
 
@@ -271,9 +266,7 @@ def export_report(
     except ValueError as exc:
         raise ValueError(f"Falha ao serializar o relatório {destination}: {exc}") from exc
     except Exception as exc:  # noqa: BLE001 - defensive
-        raise OSError(
-            f"Erro inesperado ao exportar o relatório {destination}: {exc}"
-        ) from exc
+        raise OSError(f"Erro inesperado ao exportar o relatório {destination}: {exc}") from exc
 
     logger.info("Relatório Excel exportado para %s.", destination)
     return destination

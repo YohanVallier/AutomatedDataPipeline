@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
@@ -44,8 +44,8 @@ logger = logging.getLogger(__name__)
 
 def _process_single_file(
     file_path: Path,
-    settings: "Settings",
-) -> Optional[pd.DataFrame]:
+    settings: Settings,
+) -> pd.DataFrame | None:
     """Read and normalize a single input file.
 
     Args:
@@ -81,7 +81,9 @@ def _process_single_file(
     try:
         normalized = normalize_dataframe(raw_frame, settings)
     except ValueError as exc:
-        logger.warning("Arquivo %s não pôde ser normalizado (vazio ou sem colunas): %s", file_path, exc)
+        logger.warning(
+            "Arquivo %s não pôde ser normalizado (vazio ou sem colunas): %s", file_path, exc
+        )
         return None
     except (KeyError, TypeError) as exc:
         logger.error("Falha ao normalizar %s: %s", file_path, exc)
@@ -98,7 +100,7 @@ def _process_single_file(
     return normalized
 
 
-def run_pipeline(settings: Optional["Settings"] = None) -> int:
+def run_pipeline(settings: Settings | None = None) -> int:
     """Execute the full consolidation pipeline.
 
     Args:
@@ -111,6 +113,7 @@ def run_pipeline(settings: Optional["Settings"] = None) -> int:
     """
     if settings is None:
         from config.settings import load_settings
+
         settings = load_settings()
 
     setup_logging(settings)

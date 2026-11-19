@@ -16,7 +16,8 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
@@ -130,7 +131,9 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     renamed = {col: normalize_column_name(col) for col in df.columns}
     result = df.rename(columns=renamed)
-    result = result.rename(columns={k: v for k, v in _COLUMN_ALIASES.items() if k in result.columns})
+    result = result.rename(
+        columns={k: v for k, v in _COLUMN_ALIASES.items() if k in result.columns}
+    )
     # Collapse duplicate columns produced by alias mapping (keep first).
     if result.columns.duplicated().any():
         result = result.loc[:, ~result.columns.duplicated()]
@@ -237,7 +240,7 @@ def normalize_dtypes(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
-def handle_nulls(df: pd.DataFrame, settings: "Settings") -> pd.DataFrame:
+def handle_nulls(df: pd.DataFrame, settings: Settings) -> pd.DataFrame:
     """Apply null-handling rules configured in ``settings``.
 
     Args:
@@ -277,7 +280,7 @@ def handle_nulls(df: pd.DataFrame, settings: "Settings") -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
-def normalize_dataframe(df: pd.DataFrame, settings: "Settings") -> pd.DataFrame:
+def normalize_dataframe(df: pd.DataFrame, settings: Settings) -> pd.DataFrame:
     """Normalize a raw input frame end-to-end.
 
     Applies column-name normalization, dtype normalization and null handling.
@@ -375,7 +378,7 @@ def build_sales_by_branch_summary(df: pd.DataFrame) -> pd.DataFrame:
     return summary.reset_index(drop=True)
 
 
-def build_critical_stock_summary(df: pd.DataFrame, settings: "Settings") -> pd.DataFrame:
+def build_critical_stock_summary(df: pd.DataFrame, settings: Settings) -> pd.DataFrame:
     """Identify products whose stock is below the configured threshold.
 
     Args:

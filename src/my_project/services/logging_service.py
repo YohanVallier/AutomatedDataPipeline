@@ -10,11 +10,12 @@ it multiple times will not duplicate handlers.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, Optional
+from typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from config.settings import Settings
@@ -125,18 +126,16 @@ def _clear_managed_handlers(logger: logging.Logger) -> None:
     for handler in list(logger.handlers):
         if getattr(handler, _HANDLER_MARKER, False):
             logger.removeHandler(handler)
-            try:
-                handler.close()
-            except Exception:  # noqa: BLE001 - closing must never raise
-                pass
+        with contextlib.suppress(Exception):
+            handler.close()
 
 
 def setup_logging(
-    settings: Optional["Settings"] = None,
+    settings: Settings | None = None,
     *,
-    log_dir: Optional[Path] = None,
-    log_filename: Optional[str] = None,
-    level: Optional[object] = None,
+    log_dir: Path | None = None,
+    log_filename: str | None = None,
+    level: object | None = None,
 ) -> logging.Logger:
     """Configure application logging for file and console output.
 
@@ -160,11 +159,7 @@ def setup_logging(
         PermissionError: If permission is denied when creating the directory
             or opening the file.
     """
-    resolved_dir = Path(
-        log_dir
-        if log_dir is not None
-        else getattr(settings, "log_dir", "logs")
-    )
+    resolved_dir = Path(log_dir if log_dir is not None else getattr(settings, "log_dir", "logs"))
     resolved_name = (
         log_filename
         if log_filename is not None
@@ -185,11 +180,15 @@ def setup_logging(
     logger.addHandler(_build_file_handler(log_file, resolved_level))
     logger.addHandler(_build_console_handler(resolved_level))
 
-    logger.debug("Logging configurado: arquivo=%s nível=%s", log_file, logging.getLevelName(resolved_level))
+    logger.debug(
+        "Logging configurado: arquivo=%s nível=%s",
+        log_file,
+        logging.getLevelName(resolved_level),
+    )
     return logger
 
 
-def get_logger(name: Optional[str] = None) -> logging.Logger:
+def get_logger(name: str | None = None) -> logging.Logger:
     """Return a child logger under the application root logger.
 
     Args:

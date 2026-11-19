@@ -18,8 +18,9 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence, TypeVar
+from typing import TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +46,7 @@ def ensure_directory(path: Path) -> Path:
     directory = Path(path)
     if directory.exists():
         if not directory.is_dir():
-            raise NotADirectoryError(
-                f"O caminho existe mas não é um diretório: {directory}"
-            )
+            raise NotADirectoryError(f"O caminho existe mas não é um diretório: {directory}")
         return directory
 
     try:
@@ -134,9 +133,7 @@ def format_currency(value: float, *, symbol: str = "R$") -> str:
         amount = 0.0
 
     formatted = f"{amount:,.2f}"
-    formatted = (
-        formatted.replace(",", "\u0000").replace(".", ",").replace("\u0000", ".")
-    )
+    formatted = formatted.replace(",", "\u0000").replace(".", ",").replace("\u0000", ".")
     return f"{symbol} {formatted}"
 
 

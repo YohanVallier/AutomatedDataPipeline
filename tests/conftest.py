@@ -18,12 +18,11 @@ environment and never leaks state between tests.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator, List
 
 import pandas as pd
 import pytest
-
 from config.settings import Settings
 
 # ---------------------------------------------------------------------------
@@ -159,7 +158,7 @@ def corrupt_csv(settings: Settings) -> Path:
 
 
 @pytest.fixture()
-def sample_frames() -> List[pd.DataFrame]:
+def sample_frames() -> list[pd.DataFrame]:
     """Return a list of normalized ``DataFrame`` objects for core tests.
 
     Returns:
@@ -205,7 +204,7 @@ def caplog_handler() -> Iterator[logging.Handler]:
     handler = logging.Handler()
     records: list[logging.LogRecord] = []
     handler.emit = records.append  # type: ignore[method-assign]
-    setattr(handler, "records", records)
+    handler.records = records
 
     previous_level = logger.level
     logger.setLevel(logging.DEBUG)

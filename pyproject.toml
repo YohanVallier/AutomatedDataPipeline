@@ -50,11 +50,12 @@ include = ["my_project*"]
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-ra -q --strict-markers"
+pythonpath = [".", "src"]
 testpaths = ["tests"]
-pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
 
 [tool.coverage.run]
 source = ["src/my_project"]

@@ -10,12 +10,14 @@ it multiple times will not duplicate handlers.
 
 from __future__ import annotations
 
-import contextlib
 import logging
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
+import contextlib
+from xml.sax import handler
+
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from config.settings import Settings
@@ -93,7 +95,9 @@ def _build_file_handler(log_file: Path, level: int) -> logging.Handler:
             f"Permissão negada ao abrir o arquivo de log {log_file}: {exc}"
         ) from exc
     except OSError as exc:
-        raise OSError(f"Não foi possível abrir o arquivo de log {log_file}: {exc}") from exc
+        raise OSError(
+            f"Não foi possível abrir o arquivo de log {log_file}: {exc}"
+        ) from exc
 
     handler.setLevel(level)
     handler.setFormatter(logging.Formatter(_LOG_FORMAT, datefmt=_DATE_FORMAT))
@@ -159,7 +163,9 @@ def setup_logging(
         PermissionError: If permission is denied when creating the directory
             or opening the file.
     """
-    resolved_dir = Path(log_dir if log_dir is not None else getattr(settings, "log_dir", "logs"))
+    resolved_dir = Path(
+        log_dir if log_dir is not None else getattr(settings, "log_dir", "logs")
+    )
     resolved_name = (
         log_filename
         if log_filename is not None
